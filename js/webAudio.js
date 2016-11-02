@@ -1,5 +1,6 @@
-var context;
-var soundBuffers = [];
+var context,
+    bufferLoader,
+    bufferList;
 
 window.addEventListener(
   'load', init, false
@@ -20,42 +21,27 @@ function setUpContext() {
 }
 
 function setUpLinks() {
+  var sounds = [];
+
   $('.soundLink').each(function() {
     var name = this.href.split('/')[this.href.split('/').length - 1].split('.')[0];
 
-    loadSound(this.href, name);
+    sounds.push(this.href);
 
     $(this).click(function(e) {
       e.preventDefault();
-      playSound(name);
+      playSound(e.target);
     });
   });
+
+  bufferLoader = new BufferLoader(context, sounds);
+  bufferList = bufferLoader.load();
 }
 
-function loadSound(soundURL, name) {
-  var request = new XMLHttpRequest();
-
-  request.open('GET', soundURL, true);
-  request.responseType = 'arraybuffer';
-  request.onload = function() {
-    context.decodeAudioData(request.response, function(buffer) {
-      soundBuffers[name] = buffer;
-      console.log('sound loaded!')
-    });
-  }
-
-  request.send();
-}
-
-
-function playSound(name) {
-  console.log(name);
-
+function playSound(link) {
   var source = context.createBufferSource();
 
-  source.buffer = soundBuffers[name];
+  source.buffer = bufferList[$(link).parent().index()];
   source.connect(context.destination);
   source.start(0);
 }
-
-console.log('soundBuffers: ', soundBuffers);
