@@ -1,73 +1,109 @@
-var context,
-    bufferLoader,
-    bufferList,
-    bpm = 120,      // BPM
-    signature = 4;  // beats per bar
+'use strict';
 
-window.addEventListener(
-  'load', init, false
-);
-
-function init() {
-  setUpContext();
-  setUpLink();
-  loadSounds();
+var Rhythmn = function() {
+  this.context;
+  this.bufferLoader;
+  this.bufferList;
+  this.bpm = 120;     // BPM
+  this.signature = 4; // beats per bar
+  this.playState;
 }
 
-function setUpContext() {
+Rhythmn.prototype.init = function() {
+  console.log('this: ', this);
+  console.log('init!')
+
+  this._setUpContext();
+  this._setUpLink();
+  this._loadSounds();
+}
+
+Rhythmn.prototype._setUpContext = function() {
+  console.log('_setUpContext!');
+
   try {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    context = new window.AudioContext();
+    this.context = new window.AudioContext();
   } catch(e) {
     console.log('WebAudio API is not supported in this browser!');
   }
 }
 
-function setUpLink() {
-  $('.play').click(function() {
-    play();
+Rhythmn.prototype._setUpLink = function() {
+  console.log('_setUpLink!');
+
+  var _this = this;
+
+  $('.start').click(function() {
+    _this.playState = true;
+    _this._play();
+  });
+
+  $('.stop').click(function() {
+    _this.playState = false;
   });
 }
 
-function loadSounds() {
+Rhythmn.prototype._loadSounds =  function() {
   var sounds = [
     'sounds/hihat-acoustic01.wav',
     'sounds/kick-acoustic01.wav',
     'sounds/snare-acoustic01.wav'
   ];
 
-  bufferLoader = new BufferLoader(context, sounds);
-  bufferList = bufferLoader.load();
+  this.bufferLoader = new BufferLoader(this.context, sounds);
+  this.bufferList = this.bufferLoader.load();
 }
 
-function play() {
-  var beat = 0;
-  var time = 60 / bpm;
-  var startTime = context.currentTime;
+Rhythmn.prototype._play =  function() {
+  console.log('play!');
 
-  // play 3 bars
-  for (var bar = 0; bar < 3; bar++) {
-    // kick drum on each beat
-    for (var beat = 0; beat < signature; beat++) {
-      playSound(bufferList[1], (bar * time * signature) + (beat * time) + startTime);
-    }
+  var _this = this;
+  var time = (60 / _this.bpm) * 1000;
 
-    // hi hat on every second beat
-    for (var beat = 0; beat < signature * 2; beat++) {
-      playSound(bufferList[0], (bar * time * signature) + (beat * (time / 2)) + startTime);
-    }
+  // kick drum on each beat
+  var intervalID_kick = window.setInterval(
+    function() {
+      if (_this.playState == true) {
+        _this._playSound(_this.bufferList[1], _this.context.currentTime);
+      } else {
+        clearInterval(intervalID_kick);
+      }
+    },
+    time
+  );
 
-    // snare on every second beat
-    for (var beat = 0; beat < signature / 2; beat++) {
-      playSound(bufferList[2], (bar * time * signature) + (beat * (time * 2)) + startTime);
-    }
-  }
+  // hi hat on every second beat
+  var intervalID_hh = window.setInterval(
+    function() {
+      if (_this.playState == true) {
+        _this._playSound(_this.bufferList[0], _this.context.currentTime);
+      } else {
+        clearInterval(intervalID_hh);
+      }
+    },
+    time * 2
+  );
+
+  // snare on every second beat
+  var intervalID_snare = window.setInterval(
+    function() {
+      if (_this.playState == true) {
+        _this._playSound(_this.bufferList[2], _this.context.currentTime);
+      } else {
+        clearInterval(intervalID_snare);
+      }
+    },
+    time * 2
+  );
 }
 
-function playSound(buffer, time) {
-  var source = context.createBufferSource();
+Rhythmn.prototype._playSound =  function(buffer, time) {
+  console.log('_playSound!');
 
-  source.buffer = buffer; // bufferList[$(link).parent().index()];
-  source.connect(context.destination);
+  var source = this.context.createBufferSource();
+
+  source.buffer = buffer;
+  source.connect(this.context.destination);
   source.start(time);
 }
