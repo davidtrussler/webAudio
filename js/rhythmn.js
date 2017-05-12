@@ -1,7 +1,6 @@
 'use strict';
 
 var Rhythmn = function() {
-  this.context;
   this.bufferLoader;
   this.bufferList;
   this.bpm = 120;     // BPM
@@ -10,23 +9,13 @@ var Rhythmn = function() {
 }
 
 Rhythmn.prototype.init = function() {
-  console.log('this: ', this);
   console.log('init!')
 
-  this._setUpContext();
+  var context = new ContextCreator();
+
+  this.context = context.setUp();
   this._setUpLink();
   this._loadSounds();
-}
-
-Rhythmn.prototype._setUpContext = function() {
-  console.log('_setUpContext!');
-
-  try {
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    this.context = new window.AudioContext();
-  } catch(e) {
-    console.log('WebAudio API is not supported in this browser!');
-  }
 }
 
 Rhythmn.prototype._setUpLink = function() {
