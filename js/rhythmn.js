@@ -62,7 +62,7 @@ Rhythmn.prototype._play =  function() {
     time
   );
 
-  // hi hat on every second beat
+  // hi hat on every half beat
   var intervalID_hh = window.setInterval(
     function() {
       if (_this.playState == true) {
@@ -71,7 +71,7 @@ Rhythmn.prototype._play =  function() {
         clearInterval(intervalID_hh);
       }
     },
-    time * 2
+    time / 2
   );
 
   // snare on every second beat
