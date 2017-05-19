@@ -4,16 +4,17 @@ var Rhythmn = function() {
   this.bufferLoader;
   this.bufferList;
   this.bpm = 120;     // BPM
-  this.signature = 4; // beats per bar
+  // this.signature = 4; // beats per bar
   this.playState;
 }
 
 Rhythmn.prototype.init = function() {
-  console.log('init!')
+  console.log('init!');
 
   var context = new ContextCreator();
 
   this.context = context.setUp();
+  this.gainNode = this.context.createGain();
   this._setUpLink();
   this._loadSounds();
 }
@@ -23,12 +24,12 @@ Rhythmn.prototype._setUpLink = function() {
 
   var _this = this;
 
-  $('.start').click(function() {
+  $('#start').click(function() {
     _this.playState = true;
     _this._play();
   });
 
-  $('.stop').click(function() {
+  $('#stop').click(function() {
     _this.playState = false;
   });
 }
@@ -93,6 +94,8 @@ Rhythmn.prototype._playSound =  function(buffer, time) {
   var source = this.context.createBufferSource();
 
   source.buffer = buffer;
-  source.connect(this.context.destination);
+  source.connect(this.gainNode);
+  this.gainNode.connect(this.context.destination);
+  this.gainNode.gain.value = $('#volume').val();
   source.start(time);
 }
