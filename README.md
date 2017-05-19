@@ -12,6 +12,8 @@ Broken down into iterations to keep different experiments separate and re-use mo
 
 - **context-creator**: Creates a new object fro the audio context. Useful going forward to separate out into re-usable modules.
 
+- **volume-control**: adds a single volume control to the app
+
 
 TODO
 - use JQuery for XHR Request
